@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seller's Admin Page</title>
+  <style>
+    /* Add your styles here */
+  </style>
+</head>
+<body>
+  <h1>Seller's Admin Page</h1>
+  
+  <!-- Form for adding stock -->
+  <form id="stockForm">
+    <label for="item">Item:</label>
+    <input type="text" id="item" required>
+    
+    <label for="quantity">Quantity:</label>
+    <input type="number" id="quantity" required>
+    
+    <label for="price">Price:</label>
+    <input type="number" id="price" required>
+    
+    <button type="button" onclick="addStock()">Add Stock</button>
+  </form>
+  
+  <!-- Display stock -->
+  <h2>Stock List</h2>
+  <ul id="stockList"></ul>
+  
+  <!-- Button to calculate total stock value -->
+  <button type="button" onclick="calculateTotalValue()">Calculate Total Value</button>
+  <p id="totalValue"></p>
+
+  <script src="server.js">
+    const stockForm = document.getElementById('stockForm');
+const stockList = document.getElementById('stockList');
+const totalValueElement = document.getElementById('totalValue');
+
+// Function to add stock
+function addStock() {
+  const item = document.getElementById('item').value;
+  const quantity = parseInt(document.getElementById('quantity').value);
+  const price = parseFloat(document.getElementById('price').value);
+
+  // Send data to the server
+  fetch('/stock', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ item, quantity, price }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Update the stock list
+    displayStock();
+  });
+
+  // Clear the form
+  stockForm.reset();
+}
+
+// Function to display stock
+function displayStock() {
+  // Fetch stock from the server
+  fetch('/stock')
+  .then(response => response.json())
+  .then(data => {
+    // Clear the stock list
+    stockList.innerHTML = '';
+
+    // Update the stock list
+    data.forEach(item => {
+      const li = document.createElement('li');
+      li.innerHTML = `${item.item} - Quantity: ${item.quantity}, Price: ${item.price}`;
+      stockList.appendChild(li);
+    });
+  });
+}
+
+// Function to calculate total stock value
+function calculateTotalValue() {
+  // Fetch total stock value from the server
+  fetch('/stock/value')
+  .then(response => response.json())
+  .then(data => {
+    totalValueElement.innerHTML = `Total Stock Value: ${data.totalValue}`;
+  });
+}
+
+// Initial display of stock
+displayStock();
+
+  </script>
+</body>
+</html>
